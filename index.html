@@ -190,6 +190,26 @@
             renderTool(initialTool);
         };
 
+        // --- Global Utility Functions for Inline HTML Handlers ---
+        // Functions referenced directly in the HTML 'on...' attributes must be on the window object.
+
+        // Calculator functions are mostly hooked up via event listeners inside renderCalculator.
+
+        // Stopwatch/Timer Functions
+        window.startStopwatch = startStopwatch;
+        window.pauseStopwatch = pauseStopwatch;
+        window.resetStopwatch = resetStopwatch;
+
+        // Unit Converter Functions
+        window.convertTemperature = convertTemperature;
+        window.convertLength = convertLength;
+        
+        // To-Do List Functions (these are also defined globally below)
+        window.handleAddTodo = handleAddTodo;
+        window.toggleTodo = toggleTodo;
+        window.deleteTodo = deleteTodo;
+
+
         // --- Tool Implementations ---
 
         function renderDashboard() {
@@ -229,7 +249,7 @@
             `;
         }
         
-        // --- Calculator Tool Logic (Same as before) ---
+        // --- Calculator Tool Logic ---
         let currentInput = '0';
         let previousInput = null;
         let operation = null;
@@ -308,6 +328,9 @@
         }
 
         function renderCalculator() {
+            // Reset calculator state on load
+            clearCalc();
+
             toolContainer.innerHTML = `
                 <h2 class="text-2xl font-bold mb-4 text-primary-blue">Basic Calculator</h2>
                 <div class="max-w-xs mx-auto p-4 bg-gray-900 rounded-xl shadow-2xl">
@@ -317,7 +340,7 @@
                     />
 
                     <!-- Buttons -->
-                    <div class="calculator-grid">
+                    <div id="calc-buttons" class="calculator-grid">
                         <button class="col-span-2 bg-gray-600 text-white p-4 rounded-lg text-xl font-semibold hover:bg-gray-500 transition-colors" data-action="clear">AC</button>
                         <button class="bg-gray-600 text-white p-4 rounded-lg text-xl font-semibold hover:bg-gray-500 transition-colors" data-action="divide">/</button>
                         <button class="bg-accent-orange text-white p-4 rounded-lg text-xl font-semibold hover:bg-orange-600 transition-colors" data-action="multiply">*</button>
@@ -344,7 +367,7 @@
             `;
 
             const display = document.getElementById('calc-display');
-            const buttons = toolContainer.querySelectorAll('button');
+            const buttons = toolContainer.querySelectorAll('#calc-buttons button');
 
             buttons.forEach(button => {
                 button.addEventListener('click', () => {
@@ -379,8 +402,6 @@
                 });
             });
 
-            // Set initial state
-            clearCalc();
             updateCalcDisplay(display);
         }
 
@@ -417,7 +438,8 @@
             if (!isRunning) {
                 isRunning = true;
                 startTime = Date.now() - elapsed;
-                window.stopwatchInterval = setInterval(updateStopwatch, 10);
+                // Store interval ID on window for cleanup on tool change
+                window.stopwatchInterval = setInterval(updateStopwatch, 10); 
                 document.getElementById('start-btn').classList.add('hidden');
                 document.getElementById('pause-btn').classList.remove('hidden');
             }
@@ -436,6 +458,9 @@
             pauseStopwatch();
             elapsed = 0;
             updateStopwatch();
+            // Ensure buttons are reset after a pause/reset sequence
+            document.getElementById('start-btn')?.classList.remove('hidden');
+            document.getElementById('pause-btn')?.classList.add('hidden');
         }
 
         function renderStopwatch() {
@@ -449,6 +474,7 @@
                 </div>
 
                 <div class="flex justify-center space-x-4 mt-6">
+                    <!-- Note: onclick handlers now call the globally attached functions (window.startStopwatch, etc.) -->
                     <button id="start-btn" onclick="startStopwatch()" class="px-8 py-3 bg-accent-green text-white font-bold rounded-full text-lg hover:bg-green-600 transition-all shadow-lg transform hover:scale-105">
                         Start
                     </button>
@@ -462,9 +488,16 @@
             `;
             timerDisplay = document.getElementById('stopwatch-display');
 
-            // Restore state if available (prevents accidental loss of running timer)
-            // For simplicity, we just initialize to 0 when the tool is opened.
-            resetStopwatch();
+            // Initialize to correct state based on previous running status
+            if (isRunning) {
+                startTime = Date.now() - elapsed; // Recalculate start time
+                window.stopwatchInterval = setInterval(updateStopwatch, 10);
+                document.getElementById('start-btn').classList.add('hidden');
+                document.getElementById('pause-btn').classList.remove('hidden');
+            } else {
+                 // Ensures the display is updated if the elapsed time was not zero before navigating away
+                updateStopwatch();
+            }
         }
 
         // --- Unit Converter Tool Logic ---
@@ -480,11 +513,13 @@
                         <div class="flex space-x-2">
                             <div class="flex-1">
                                 <label for="celsius" class="block text-sm font-medium text-gray-500">Celsius (°C)</label>
+                                <!-- oninput calls globally attached function -->
                                 <input type="number" id="celsius" oninput="convertTemperature(this.value, 'C')"
                                     class="mt-1 w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-primary-blue focus:border-primary-blue" placeholder="0">
                             </div>
                             <div class="flex-1">
                                 <label for="fahrenheit" class="block text-sm font-medium text-gray-500">Fahrenheit (°F)</label>
+                                <!-- oninput calls globally attached function -->
                                 <input type="number" id="fahrenheit" oninput="convertTemperature(this.value, 'F')"
                                     class="mt-1 w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-primary-blue focus:border-primary-blue" placeholder="32">
                             </div>
@@ -514,9 +549,7 @@
                     </div>
                 </div>
             `;
-            // Attach global functions to window so they can be called from 'oninput'
-            window.convertTemperature = convertTemperature;
-            window.convertLength = convertLength;
+            // No need to attach to window here as it's done near the top of the script
         }
 
         function convertTemperature(value, unit) {
@@ -564,10 +597,10 @@
                 meters = feet / M_TO_FT;
             }
 
-            // Update all fields, preventing infinite loop by checking current field update in oninput handler
-            if (unit !== 'm') document.getElementById('meters').value = meters.toFixed(4);
-            if (unit !== 'ft') document.getElementById('feet').value = feet.toFixed(4);
-            if (unit !== 'in') document.getElementById('inches').value = inches.toFixed(4);
+            // Update all fields, preventing infinite loop is handled by browser
+            if (document.getElementById('meters')) document.getElementById('meters').value = meters.toFixed(4);
+            if (document.getElementById('feet')) document.getElementById('feet').value = feet.toFixed(4);
+            if (document.getElementById('inches')) document.getElementById('inches').value = inches.toFixed(4);
         }
 
         // --- To-Do List Tool Logic (using localStorage) ---
@@ -598,7 +631,8 @@
                 <p class="text-sm text-gray-500 mb-4">Your tasks are saved locally on this browser.</p>
 
                 <!-- Add Task Form -->
-                <form id="add-todo-form" class="flex mb-6">
+                <!-- Form submission calls globally attached function -->
+                <form id="add-todo-form" onsubmit="handleAddTodo(event)" class="flex mb-6">
                     <input type="text" id="todo-input" placeholder="Enter new assignment or task..."
                         class="flex-grow p-3 border border-gray-300 rounded-l-lg focus:ring-accent-red focus:border-accent-red" required>
                     <button type="submit" class="px-5 bg-accent-red text-white font-semibold rounded-r-lg hover:bg-red-600 transition-colors shadow-md">
@@ -612,41 +646,9 @@
                 </ul>
             `;
             
-            document.getElementById('add-todo-form').addEventListener('submit', handleAddTodo);
+            // We use the onsubmit attribute on the form, so we don't need a separate listener here,
+            // but we must ensure loadTodos is called to render the list
             loadTodos();
-            window.toggleTodo = toggleTodo;
-            window.deleteTodo = deleteTodo;
-        }
-
-        function loadTodos() {
-            const todos = getTodos();
-            const listElement = document.getElementById('todo-list');
-            listElement.innerHTML = ''; // Clear existing list
-
-            if (todos.length === 0) {
-                listElement.innerHTML = '<li class="text-center text-gray-400 py-6">All clear! Add a new task above.</li>';
-                return;
-            }
-
-            todos.forEach((todo, index) => {
-                const listItem = document.createElement('li');
-                listItem.className = \`flex items-center p-3 bg-secondary-gray rounded-lg shadow-sm transition-opacity \${todo.completed ? 'opacity-50' : ''}\`;
-                
-                listItem.innerHTML = `
-                    <input type="checkbox" id="todo-\${index}" \${todo.completed ? 'checked' : ''} 
-                        onclick="toggleTodo(\${index})" class="w-5 h-5 text-accent-red rounded border-gray-300 focus:ring-accent-red cursor-pointer">
-                    
-                    <label for="todo-\${index}" class="ml-3 flex-grow text-lg font-medium text-gray-700 \${todo.completed ? 'line-through text-gray-500' : ''} cursor-pointer">
-                        ${todo.text}
-                    </label>
-
-                    <button onclick="deleteTodo(\${index})" title="Delete Task"
-                        class="ml-3 p-1 text-gray-400 hover:text-accent-red transition-colors rounded-full hover:bg-gray-200">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3m-3 0h14"></path></svg>
-                    </button>
-                `;
-                listElement.appendChild(listItem);
-            });
         }
 
         function handleAddTodo(event) {
@@ -663,6 +665,42 @@
             }
         }
 
+        function loadTodos() {
+            const todos = getTodos();
+            const listElement = document.getElementById('todo-list');
+            
+            if (!listElement) return; // Prevent error if loadTodos is called outside of the todo tool
+
+            listElement.innerHTML = ''; // Clear existing list
+
+            if (todos.length === 0) {
+                listElement.innerHTML = '<li class="text-center text-gray-400 py-6">All clear! Add a new task above.</li>';
+                return;
+            }
+
+            todos.forEach((todo, index) => {
+                const listItem = document.createElement('li');
+                listItem.className = `flex items-center p-3 bg-secondary-gray rounded-lg shadow-sm transition-opacity ${todo.completed ? 'opacity-50' : ''}`;
+                
+                listItem.innerHTML = `
+                    <!-- onclick calls globally attached function -->
+                    <input type="checkbox" id="todo-${index}" ${todo.completed ? 'checked' : ''} 
+                        onclick="toggleTodo(${index})" class="w-5 h-5 text-accent-red rounded border-gray-300 focus:ring-accent-red cursor-pointer">
+                    
+                    <label for="todo-${index}" class="ml-3 flex-grow text-lg font-medium text-gray-700 ${todo.completed ? 'line-through text-gray-500' : ''} cursor-pointer">
+                        ${todo.text}
+                    </label>
+
+                    <!-- onclick calls globally attached function -->
+                    <button onclick="deleteTodo(${index})" title="Delete Task"
+                        class="ml-3 p-1 text-gray-400 hover:text-accent-red transition-colors rounded-full hover:bg-gray-200">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3m-3 0h14"></path></svg>
+                    </button>
+                `;
+                listElement.appendChild(listItem);
+            });
+        }
+
         function toggleTodo(index) {
             const todos = getTodos();
             if (index >= 0 && index < todos.length) {
@@ -675,6 +713,8 @@
         function deleteTodo(index) {
             const todos = getTodos();
             if (index >= 0 && index < todos.length) {
+                // To display a custom modal instead of alert/confirm, we'll proceed directly to delete.
+                // For a real app, you'd show a modal here.
                 todos.splice(index, 1); // Remove item at index
                 saveTodos(todos);
                 loadTodos(); // Re-render the list
