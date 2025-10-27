@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>School Toolkit</title>
+    <!-- Updated Title to EduKit -->
+    <title>EduKit</title>
+    <!-- Favicon added using the provided URL -->
+    <link rel="icon" type="image/jpeg" href="https://gitrepoextender-1.github.io/toolsforschool/files/product_logo.jpeg">
+    
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Load Inter Font -->
@@ -54,9 +58,16 @@
     <!-- Main Container -->
     <div class="max-w-xl mx-auto px-4">
 
-        <!-- Header -->
+        <!-- Header - Updated with Logo and new name "EduKit" -->
         <header class="text-center mb-8 p-4 bg-white rounded-xl shadow-lg">
-            <h1 class="text-3xl font-extrabold text-primary-blue">School Toolkit</h1>
+            <div class="flex items-center justify-center space-x-3">
+                <img src="https://gitrepoextender-1.github.io/toolsforschool/files/product_logo.jpeg" 
+                     alt="EduKit Logo" 
+                     class="h-8 w-8 rounded-full object-cover" 
+                     onerror="this.style.display='none';" 
+                />
+                <h1 class="text-3xl font-extrabold text-primary-blue">EduKit</h1>
+            </div>
             <p id="page-subtitle" class="text-sm text-gray-500 mt-1">Select a tool to get started!</p>
         </header>
 
@@ -192,8 +203,6 @@
 
         // --- Global Utility Functions for Inline HTML Handlers ---
         // Functions referenced directly in the HTML 'on...' attributes must be on the window object.
-
-        // Calculator functions are mostly hooked up via event listeners inside renderCalculator.
 
         // Stopwatch/Timer Functions
         window.startStopwatch = startStopwatch;
