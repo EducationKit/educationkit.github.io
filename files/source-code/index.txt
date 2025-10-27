@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Updated Title to EduKit -->
+    <title>EduKit</title>
+    <!-- Favicon updated with new URL and HEIC type -->
+    <link rel="icon" type="image/heic" href="https://educationkit.github.io/files/product_logo.heic">
+    
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles for the calculator grid */
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+        }
+        /* Custom focus state */
+        .tool-button:focus-visible {
+            outline: 2px solid theme('colors.blue.500');
+            outline-offset: 2px;
+        }
+        /* Hide scrollbar on nav for aesthetic on small screens */
+        .nav-scroll {
+            overflow-x: auto;
+            -ms-overflow-style: none; /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+        .nav-scroll::-webkit-scrollbar {
+            display: none; /* Chrome, Safari and Opera */
+        }
+        .note-editor textarea {
+            min-height: 200px;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'primary-blue': '#1E40AF',
+                        'secondary-gray': '#E5E7EB',
+                        'accent-orange': '#F97316',
+                        'accent-green': '#10B981',
+                        'accent-red': '#EF4444',
+                        'accent-yellow': '#F59E0B', /* New color for Notes */
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen pt-4 pb-20 md:pb-12 font-sans">
+
+    <!-- Main Container -->
+    <div class="max-w-xl mx-auto px-4">
+
+        <!-- Header - Updated with Logo and new name "EduKit" -->
+        <header class="text-center mb-8 p-4 bg-white rounded-xl shadow-lg">
+            <div class="flex items-center justify-center space-x-3">
+                <!-- Image source updated to new URL -->
+                <img src="https://educationkit.github.io/files/product_logo.heic" 
+                     alt="EduKit Logo" 
+                     class="h-8 w-8 rounded-full object-cover" 
+                     onerror="this.style.display='none'; console.warn('Logo failed to load. Ensure HEIC is supported.');" 
+                />
+                <h1 class="text-3xl font-extrabold text-primary-blue">EduKit</h1>
+            </div>
+            <p id="page-subtitle" class="text-sm text-gray-500 mt-1">Select a tool to get started!</p>
+        </header>
+
+        <!-- Main Content Area -->
+        <main id="tool-container" class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 min-h-[500px]">
+            <!-- Content will be rendered here by JavaScript -->
+            <div class="text-center py-20 text-gray-500">Loading Tool...</div>
+        </main>
+
+        <!-- Navigation (Always visible) -->
+        <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-2xl z-10 p-2 md:relative md:mt-8 md:p-0 md:border-t-0 md:shadow-none">
+            <div class="flex justify-start md:justify-around max-w-xl mx-auto nav-scroll">
+                
+                <!-- Dashboard -->
+                <a href="?tool=dashboard" onclick="navigate('dashboard', event)" class="flex-shrink-0 w-1/6 md:flex-1 flex flex-col items-center text-center p-2 md:p-4 rounded-lg transition-colors duration-200 tool-button" data-tool="dashboard">
+                    <svg class="w-6 h-6 mx-auto mb-1 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                    <span class="text-xs font-medium md:text-sm text-gray-600">Home</span>
+                </a>
+                
+                <!-- Calculator -->
+                <a href="?tool=calculator" onclick="navigate('calculator', event)" class="flex-shrink-0 w-1/6 md:flex-1 flex flex-col items-center text-center p-2 md:p-4 rounded-lg transition-colors duration-200 tool-button" data-tool="calculator">
+                    <svg class="w-6 h-6 mx-auto mb-1 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                    <span class="text-xs font-medium md:text-sm text-gray-600">Calc</span>
+                </a>
+
+                <!-- Stopwatch -->
+                <a href="?tool=stopwatch" onclick="navigate('stopwatch', event)" class="flex-shrink-0 w-1/6 md:flex-1 flex flex-col items-center text-center p-2 md:p-4 rounded-lg transition-colors duration-200 tool-button" data-tool="stopwatch">
+                    <svg class="w-6 h-6 mx-auto mb-1 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span class="text-xs font-medium md:text-sm text-gray-600">Stopwatch</span>
+                </a>
+
+                <!-- Converter -->
+                <a href="?tool=converter" onclick="navigate('converter', event)" class="flex-shrink-0 w-1/6 md:flex-1 flex flex-col items-center text-center p-2 md:p-4 rounded-lg transition-colors duration-200 tool-button" data-tool="converter">
+                    <svg class="w-6 h-6 mx-auto mb-1 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                    <span class="text-xs font-medium md:text-sm text-gray-600">Convert</span>
+                </a>
+                
+                <!-- Notes (NEW) -->
+                <a href="?tool=notes" onclick="navigate('notes', event)" class="flex-shrink-0 w-1/6 md:flex-1 flex flex-col items-center text-center p-2 md:p-4 rounded-lg transition-colors duration-200 tool-button" data-tool="notes">
+                    <svg class="w-6 h-6 mx-auto mb-1 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    <span class="text-xs font-medium md:text-sm text-gray-600">Notes</span>
+                </a>
+
+                <!-- To-Do List -->
+                <a href="?tool=todo" onclick="navigate('todo', event)" class="flex-shrink-0 w-1/6 md:flex-1 flex flex-col items-center text-center p-2 md:p-4 rounded-lg transition-colors duration-200 tool-button" data-tool="todo">
+                    <svg class="w-6 h-6 mx-auto mb-1 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                    <span class="text-xs font-medium md:text-sm text-gray-600">To-Do</span>
+                </a>
+            </div>
+        </nav>
+    </div>
+
+    <script>
+        const toolContainer = document.getElementById('tool-container');
+        const subtitle = document.getElementById('page-subtitle');
+        const navigationLinks = document.querySelectorAll('.tool-button');
+
+        // --- Core Routing Functions ---
+
+        /** Gets the current tool from the URL parameter. Defaults to 'dashboard'. */
+        function getCurrentTool() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('tool') || 'dashboard';
+        }
+
+        /** Handles navigation link clicks. Updates URL and renders the new tool. */
+        function navigate(tool, event) {
+            if (event) event.preventDefault();
+            const newUrl = `${window.location.pathname}?tool=${tool}`;
+            window.history.pushState({ tool: tool }, '', newUrl);
+            renderTool(tool);
+        }
+
+        /** Main rendering function that switches the view based on the tool name. */
+        function renderTool(tool) {
+            toolContainer.innerHTML = ''; // Clear previous content
+            setActiveNav(tool);
+
+            // Cleanup any active intervals (like stopwatch/timer)
+            if (window.stopwatchInterval) clearInterval(window.stopwatchInterval);
+            
+            switch (tool) {
+                case 'calculator':
+                    subtitle.textContent = 'A simple arithmetic calculator.';
+                    renderCalculator();
+                    break;
+                case 'stopwatch':
+                    subtitle.textContent = 'Keep track of your study time.';
+                    renderStopwatch();
+                    break;
+                case 'converter':
+                    subtitle.textContent = 'Quickly convert common units.';
+                    renderConverter();
+                    break;
+                case 'notes':
+                    subtitle.textContent = 'Create and manage your study notes.';
+                    renderNotes();
+                    break;
+                case 'todo':
+                    subtitle.textContent = 'Organize your assignments and tasks.';
+                    renderTodoList();
+                    break;
+                case 'dashboard':
+                default:
+                    subtitle.textContent = 'Select a tool to get started!';
+                    renderDashboard();
+                    break;
+            }
+        }
+
+        /** Updates the visual state of the navigation links. */
+        function setActiveNav(activeTool) {
+            navigationLinks.forEach(link => {
+                const tool = link.getAttribute('data-tool');
+                const icon = link.querySelector('svg');
+                const text = link.querySelector('span');
+                
+                if (tool === activeTool) {
+                    link.classList.add('bg-primary-blue', 'text-white');
+                    link.classList.remove('text-gray-600', 'hover:bg-secondary-gray');
+                    if (icon) icon.classList.remove('text-gray-600');
+                    if (text) text.classList.remove('text-gray-600');
+                } else {
+                    link.classList.remove('bg-primary-blue', 'text-white');
+                    link.classList.add('text-gray-600', 'hover:bg-secondary-gray');
+                    if (icon) icon.classList.add('text-gray-600');
+                    if (text) text.classList.add('text-gray-600');
+                }
+            });
+        }
+
+        // Listen for browser back/forward buttons
+        window.onpopstate = (event) => {
+            const tool = getCurrentTool();
+            renderTool(tool);
+        };
+
+        // Initialize the app
+        window.onload = () => {
+            const initialTool = getCurrentTool();
+            renderTool(initialTool);
+        };
+
+        // --- Global Utility Functions for Inline HTML Handlers ---
+        
+        // Calculator Functions
+        window.handleOperation = handleOperation; // Not strictly needed here but keeping for consistency
+        window.calculate = calculate; 
+        window.clearCalc = clearCalc;
+        
+        // Stopwatch/Timer Functions
+        window.startStopwatch = startStopwatch;
+        window.pauseStopwatch = pauseStopwatch;
+        window.resetStopwatch = resetStopwatch;
+
+        // Unit Converter Functions
+        window.convertTemperature = convertTemperature;
+        window.convertLength = convertLength;
+        
+        // To-Do List Functions 
+        window.handleAddTodo = handleAddTodo;
+        window.toggleTodo = toggleTodo;
+        window.deleteTodo = deleteTodo;
+
+        // Notes Tool Functions (NEW)
+        window.addNewNote = addNewNote;
+        window.viewNote = viewNote;
+        window.saveNote = saveNote;
+        window.deleteNote = deleteNote;
+        window.returnToNotesList = returnToNotesList;
+
+
+        // --- Tool Implementations ---
+
+        function renderDashboard() {
+            toolContainer.innerHTML = `
+                <h2 class="text-2xl font-bold mb-6 text-primary-blue">Welcome to Your Study Hub</h2>
+                <p class="mb-6 text-gray-600">This toolkit provides quick access to essential utilities to help you stay productive. Use the navigation bar below to switch between tools.</p>
+
+                <div class="space-y-4">
+                    <!-- Calculator Card -->
+                    <div class="p-4 bg-secondary-gray rounded-xl shadow-md border border-gray-200">
+                        <h3 class="text-xl font-semibold text-gray-700">Calculator</h3>
+                        <p class="text-sm text-gray-500 mt-1">Perform basic arithmetic quickly.</p>
+                        <button onclick="navigate('calculator')" class="mt-3 w-full py-2 bg-accent-orange text-white font-semibold rounded-lg hover:bg-orange-600 transition-colors shadow-md">Launch Calculator</button>
+                    </div>
+
+                    <!-- Stopwatch Card -->
+                    <div class="p-4 bg-secondary-gray rounded-xl shadow-md border border-gray-200">
+                        <h3 class="text-xl font-semibold text-gray-700">Stopwatch & Timer</h3>
+                        <p class="text-sm text-gray-500 mt-1">Time tests or focus sessions accurately.</p>
+                        <button onclick="navigate('stopwatch')" class="mt-3 w-full py-2 bg-accent-green text-white font-semibold rounded-lg hover:bg-green-600 transition-colors shadow-md">Launch Stopwatch</button>
+                    </div>
+
+                    <!-- Converter Card -->
+                    <div class="p-4 bg-secondary-gray rounded-xl shadow-md border border-gray-200">
+                        <h3 class="text-xl font-semibold text-gray-700">Unit Converter</h3>
+                        <p class="text-sm text-gray-500 mt-1">Convert common units like temperature and length.</p>
+                        <button onclick="navigate('converter')" class="mt-3 w-full py-2 bg-primary-blue text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-md">Launch Converter</button>
+                    </div>
+                    
+                    <!-- Notes Card (NEW) -->
+                    <div class="p-4 bg-secondary-gray rounded-xl shadow-md border border-gray-200">
+                        <h3 class="text-xl font-semibold text-gray-700">Notes Tool</h3>
+                        <p class="text-sm text-gray-500 mt-1">Jot down important lecture points and study reminders.</p>
+                        <button onclick="navigate('notes')" class="mt-3 w-full py-2 bg-accent-yellow text-white font-semibold rounded-lg hover:bg-yellow-600 transition-colors shadow-md">Launch Notes</button>
+                    </div>
+
+                    <!-- To-Do Card -->
+                    <div class="p-4 bg-secondary-gray rounded-xl shadow-md border border-gray-200">
+                        <h3 class="text-xl font-semibold text-gray-700">Simple To-Do List</h3>
+                        <p class="text-sm text-gray-500 mt-1">Track your assignments and tasks. (Saves in browser)</p>
+                        <button onclick="navigate('todo')" class="mt-3 w-full py-2 bg-accent-red text-white font-semibold rounded-lg hover:bg-red-600 transition-colors shadow-md">Launch To-Do List</button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // --- Calculator Tool Logic ---
+        let currentInput = '0';
+        let previousInput = null;
+        let operation = null;
+        let waitingForSecondOperand = false;
+
+        function updateCalcDisplay(display) {
+            display.value = currentInput;
+        }
+
+        function clearCalc() {
+            currentInput = '0';
+            previousInput = null;
+            operation = null;
+            waitingForSecondOperand = false;
+        }
+
+        function appendDigit(digit) {
+            if (waitingForSecondOperand) {
+                currentInput = digit;
+                waitingForSecondOperand = false;
+            } else {
+                currentInput = currentInput === '0' ? digit : currentInput + digit;
+            }
+        }
+
+        function inputDecimal() {
+            if (waitingForSecondOperand) {
+                currentInput = '0.';
+                waitingForSecondOperand = false;
+            } else if (!currentInput.includes('.')) {
+                currentInput += '.';
+            }
+        }
+
+        function handleOperation(nextOperation) {
+            const inputValue = parseFloat(currentInput);
+
+            if (previousInput === null) {
+                previousInput = inputValue;
+            } else if (operation) {
+                const result = performCalculation(operation, previousInput, inputValue);
+                currentInput = String(result);
+                previousInput = result;
+            }
+
+            waitingForSecondOperand = true;
+            operation = nextOperation;
+        }
+
+        function calculate() {
+            if (!operation || waitingForSecondOperand) return;
+
+            const secondOperand = parseFloat(currentInput);
+            const firstOperand = previousInput;
+
+            const result = performCalculation(operation, firstOperand, secondOperand);
+            currentInput = String(result);
+            previousInput = null;
+            operation = null;
+            waitingForSecondOperand = true;
+        }
+
+        function performCalculation(op, first, second) {
+            switch (op) {
+                case '+': return first + second;
+                case '-': return first - second;
+                case '*': return first * second;
+                case '/':
+                    if (second === 0) {
+                        currentInput = "Error";
+                        return 0;
+                    }
+                    return first / second;
+                default: return second;
+            }
+        }
+
+        function renderCalculator() {
+            // Reset calculator state on load
+            clearCalc();
+
+            toolContainer.innerHTML = `
+                <h2 class="text-2xl font-bold mb-4 text-primary-blue">Basic Calculator</h2>
+                <div class="max-w-xs mx-auto p-4 bg-gray-900 rounded-xl shadow-2xl">
+                    <!-- Display -->
+                    <input id="calc-display" type="text" value="0" readonly
+                        class="w-full text-right text-4xl p-4 mb-4 bg-gray-800 text-white rounded-lg font-mono tracking-wider focus:outline-none"
+                    />
+
+                    <!-- Buttons -->
+                    <div id="calc-buttons" class="calculator-grid">
+                        <button class="col-span-2 bg-gray-600 text-white p-4 rounded-lg text-xl font-semibold hover:bg-gray-500 transition-colors" data-action="clear" onclick="clearCalc(); updateCalcDisplay(document.getElementById('calc-display'))">AC</button>
+                        <button class="bg-gray-600 text-white p-4 rounded-lg text-xl font-semibold hover:bg-gray-500 transition-colors" data-action="divide">/</button>
+                        <button class="bg-accent-orange text-white p-4 rounded-lg text-xl font-semibold hover:bg-orange-600 transition-colors" data-action="multiply">*</button>
+
+                        <button class="bg-gray-700 text-white p-4 rounded-lg text-xl hover:bg-gray-600 transition-colors" data-action="digit">7</button>
+                        <button class="bg-gray-700 text-white p-4 rounded-lg text-xl hover:bg-gray-600 transition-colors" data-action="digit">8</button>
+                        <button class="bg-gray-700 text-white p-4 rounded-lg text-xl hover:bg-gray-600 transition-colors" data-action="digit">9</button>
+                        <button class="bg-accent-orange text-white p-4 rounded-lg text-xl font-semibold hover:bg-orange-600 transition-colors" data-action="subtract">-</button>
+
+                        <button class="bg-gray-700 text-white p-4 rounded-lg text-xl hover:bg-gray-600 transition-colors" data-action="digit">4</button>
+                        <button class="bg-gray-700 text-white p-4 rounded-lg text-xl hover:bg-gray-600 transition-colors" data-action="digit">5</button>
+                        <button class="bg-gray-700 text-white p-4 rounded-lg text-xl hover:bg-gray-600 transition-colors" data-action="digit">6</button>
+                        <button class="bg-accent-orange text-white p-4 rounded-lg text-xl font-semibold hover:bg-orange-600 transition-colors" data-action="add">+</button>
+
+                        <button class="bg-gray-700 text-white p-4 rounded-lg text-xl hover:bg-gray-600 transition-colors" data-action="digit">1</button>
+                        <button class="bg-gray-700 text-white p-4 rounded-lg text-xl hover:bg-gray-600 transition-colors" data-action="digit">2</button>
+                        <button class="bg-gray-700 text-white p-4 rounded-lg text-xl hover:bg-gray-600 transition-colors" data-action="digit">3</button>
+                        <button class="bg-accent-orange text-white p-4 rounded-lg text-xl font-semibold hover:bg-orange-600 transition-colors row-span-2" data-action="equals" onclick="calculate(); updateCalcDisplay(document.getElementById('calc-display'))">=</button>
+
+                        <button class="col-span-2 bg-gray-700 text-white p-4 rounded-lg text-xl hover:bg-gray-600 transition-colors" data-action="digit">0</button>
+                        <button class="bg-gray-700 text-white p-4 rounded-lg text-xl font-semibold hover:bg-gray-600 transition-colors" data-action="decimal">.</button>
+                    </div>
+                </div>
+            `;
+
+            const display = document.getElementById('calc-display');
+            const buttons = toolContainer.querySelectorAll('#calc-buttons button');
+
+            buttons.forEach(button => {
+                button.addEventListener('click', () => {
+                    if (currentInput === "Error") {
+                        clearCalc(); // Clear error state on any input
+                    }
+
+                    const action = button.getAttribute('data-action');
+                    const value = button.textContent;
+
+                    switch (action) {
+                        case 'digit':
+                            appendDigit(value);
+                            break;
+                        case 'decimal':
+                            inputDecimal();
+                            break;
+                        case 'add':
+                        case 'subtract':
+                        case 'multiply':
+                        case 'divide':
+                            handleOperation(value);
+                            break;
+                        case 'equals':
+                            calculate();
+                            break;
+                        case 'clear':
+                            clearCalc();
+                            break;
+                    }
+                    updateCalcDisplay(display);
+                });
+            });
+
+            updateCalcDisplay(display);
+        }
+
+        // --- Stopwatch Tool Logic ---
+
+        let startTime = 0;
+        let elapsed = 0;
+        let isRunning = false;
+        let timerDisplay;
+
+        function formatTime(ms) {
+            const totalSeconds = Math.floor(ms / 1000);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            const milliseconds = Math.floor((ms % 1000) / 10); // Displaying centiseconds
+
+            const pad = (num) => String(num).padStart(2, '0');
+            const padMs = (num) => String(num).padStart(2, '0');
+
+            return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}.${padMs(milliseconds)}`;
+        }
+
+        function updateStopwatch() {
+            if (isRunning) {
+                elapsed = Date.now() - startTime;
+            }
+            if (timerDisplay) {
+                timerDisplay.textContent = formatTime(elapsed);
+            }
+        }
+
+        function startStopwatch() {
+            if (!isRunning) {
+                isRunning = true;
+                startTime = Date.now() - elapsed;
+                // Store interval ID on window for cleanup on tool change
+                window.stopwatchInterval = setInterval(updateStopwatch, 10); 
+                document.getElementById('start-btn').classList.add('hidden');
+                document.getElementById('pause-btn').classList.remove('hidden');
+            }
+        }
+
+        function pauseStopwatch() {
+            if (isRunning) {
+                clearInterval(window.stopwatchInterval);
+                isRunning = false;
+                document.getElementById('start-btn').classList.remove('hidden');
+                document.getElementById('pause-btn').classList.add('hidden');
+            }
+        }
+
+        function resetStopwatch() {
+            pauseStopwatch();
+            elapsed = 0;
+            updateStopwatch();
+            // Ensure buttons are reset after a pause/reset sequence
+            document.getElementById('start-btn')?.classList.remove('hidden');
+            document.getElementById('pause-btn')?.classList.add('hidden');
+        }
+
+        function renderStopwatch() {
+            toolContainer.innerHTML = `
+                <h2 class="text-2xl font-bold mb-4 text-primary-blue">Stopwatch</h2>
+
+                <div class="text-center py-8">
+                    <div id="stopwatch-display" class="text-6xl md:text-7xl font-mono font-extralight bg-gray-100 p-8 rounded-xl shadow-inner text-gray-800 tracking-wider">
+                        00:00:00.00
+                    </div>
+                </div>
+
+                <div class="flex justify-center space-x-4 mt-6">
+                    <!-- Note: onclick handlers now call the globally attached functions (window.startStopwatch, etc.) -->
+                    <button id="start-btn" onclick="startStopwatch()" class="px-8 py-3 bg-accent-green text-white font-bold rounded-full text-lg hover:bg-green-600 transition-all shadow-lg transform hover:scale-105">
+                        Start
+                    </button>
+                    <button id="pause-btn" onclick="pauseStopwatch()" class="px-8 py-3 bg-accent-orange text-white font-bold rounded-full text-lg hover:bg-orange-600 transition-all shadow-lg transform hover:scale-105 hidden">
+                        Pause
+                    </button>
+                    <button id="reset-btn" onclick="resetStopwatch()" class="px-8 py-3 bg-gray-400 text-gray-800 font-bold rounded-full text-lg hover:bg-gray-500 transition-all shadow-lg transform hover:scale-105">
+                        Reset
+                    </button>
+                </div>
+            `;
+            timerDisplay = document.getElementById('stopwatch-display');
+
+            // Initialize to correct state based on previous running status
+            if (isRunning) {
+                startTime = Date.now() - elapsed; // Recalculate start time
+                window.stopwatchInterval = setInterval(updateStopwatch, 10);
+                document.getElementById('start-btn').classList.add('hidden');
+                document.getElementById('pause-btn').classList.remove('hidden');
+            } else {
+                 // Ensures the display is updated if the elapsed time was not zero before navigating away
+                updateStopwatch();
+            }
+        }
+
+        // --- Unit Converter Tool Logic ---
+
+        function renderConverter() {
+            toolContainer.innerHTML = `
+                <h2 class="text-2xl font-bold mb-6 text-primary-blue">Unit Converter</h2>
+
+                <div class="space-y-8">
+                    <!-- Temperature Converter -->
+                    <div class="bg-secondary-gray p-5 rounded-xl shadow-inner">
+                        <h3 class="text-xl font-semibold mb-3 text-gray-700 border-b pb-2">Temperature</h3>
+                        <div class="flex space-x-2">
+                            <div class="flex-1">
+                                <label for="celsius" class="block text-sm font-medium text-gray-500">Celsius (°C)</label>
+                                <!-- oninput calls globally attached function -->
+                                <input type="number" id="celsius" oninput="convertTemperature(this.value, 'C')"
+                                    class="mt-1 w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-primary-blue focus:border-primary-blue" placeholder="0">
+                            </div>
+                            <div class="flex-1">
+                                <label for="fahrenheit" class="block text-sm font-medium text-gray-500">Fahrenheit (°F)</label>
+                                <!-- oninput calls globally attached function -->
+                                <input type="number" id="fahrenheit" oninput="convertTemperature(this.value, 'F')"
+                                    class="mt-1 w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-primary-blue focus:border-primary-blue" placeholder="32">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Length Converter -->
+                    <div class="bg-secondary-gray p-5 rounded-xl shadow-inner">
+                        <h3 class="text-xl font-semibold mb-3 text-gray-700 border-b pb-2">Length</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="meters" class="block text-sm font-medium text-gray-500">Meters (m)</label>
+                                <input type="number" id="meters" oninput="convertLength(this.value, 'm')"
+                                    class="mt-1 w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-primary-blue focus:border-primary-blue" placeholder="0">
+                            </div>
+                            <div>
+                                <label for="feet" class="block text-sm font-medium text-gray-500">Feet (ft)</label>
+                                <input type="number" id="feet" oninput="convertLength(this.value, 'ft')"
+                                    class="mt-1 w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-primary-blue focus:border-primary-blue" placeholder="0">
+                            </div>
+                            <div class="col-span-2">
+                                <label for="inches" class="block text-sm font-medium text-gray-500">Inches (in)</label>
+                                <input type="number" id="inches" oninput="convertLength(this.value, 'in')"
+                                    class="mt-1 w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-primary-blue focus:border-primary-blue" placeholder="0">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function convertTemperature(value, unit) {
+            const num = parseFloat(value);
+            if (isNaN(num)) {
+                document.getElementById('celsius').value = '';
+                document.getElementById('fahrenheit').value = '';
+                return;
+            }
+
+            if (unit === 'C') {
+                const f = (num * 9 / 5) + 32;
+                if (document.getElementById('fahrenheit')) document.getElementById('fahrenheit').value = f.toFixed(2);
+            } else if (unit === 'F') {
+                const c = (num - 32) * 5 / 9;
+                if (document.getElementById('celsius')) document.getElementById('celsius').value = c.toFixed(2);
+            }
+        }
+
+        function convertLength(value, unit) {
+            const num = parseFloat(value);
+            if (isNaN(num)) {
+                if (document.getElementById('meters')) document.getElementById('meters').value = '';
+                if (document.getElementById('feet')) document.getElementById('feet').value = '';
+                if (document.getElementById('inches')) document.getElementById('inches').value = '';
+                return;
+            }
+
+            const M_TO_FT = 3.28084;
+            const FT_TO_IN = 12;
+
+            let meters, feet, inches;
+
+            if (unit === 'm') {
+                meters = num;
+                feet = meters * M_TO_FT;
+                inches = feet * FT_TO_IN;
+            } else if (unit === 'ft') {
+                feet = num;
+                meters = feet / M_TO_FT;
+                inches = feet * FT_TO_IN;
+            } else if (unit === 'in') {
+                inches = num;
+                feet = inches / FT_TO_IN;
+                meters = feet / M_TO_FT;
+            }
+
+            // Update all fields
+            if (document.getElementById('meters')) document.getElementById('meters').value = meters.toFixed(4);
+            if (document.getElementById('feet')) document.getElementById('feet').value = feet.toFixed(4);
+            if (document.getElementById('inches')) document.getElementById('inches').value = inches.toFixed(4);
+        }
+        
+        // --- Notes Tool Logic (NEW) ---
+
+        const NOTES_STORAGE_KEY = 'eduKit_notes';
+
+        function getNotes() {
+            try {
+                const notes = localStorage.getItem(NOTES_STORAGE_KEY);
+                return notes ? JSON.parse(notes) : [];
+            } catch (e) {
+                console.error("Could not load notes from localStorage:", e);
+                return [];
+            }
+        }
+
+        function saveNotes(notes) {
+            try {
+                localStorage.setItem(NOTES_STORAGE_KEY, JSON.stringify(notes));
+            } catch (e) {
+                console.error("Could not save notes to localStorage:", e);
+            }
+        }
+
+        function returnToNotesList() {
+            renderNotes();
+        }
+
+        function addNewNote() {
+            const newId = Date.now();
+            const note = { 
+                id: newId, 
+                title: "New Note " + (getNotes().length + 1), 
+                content: "", 
+                timestamp: newId 
+            };
+            viewNote(note);
+        }
+
+        function viewNote(noteOrId) {
+            let note;
+            if (typeof noteOrId === 'number') {
+                const notes = getNotes();
+                note = notes.find(n => n.id === noteOrId);
+            } else {
+                note = noteOrId;
+            }
+
+            if (!note) {
+                returnToNotesList();
+                return;
+            }
+
+            const isNew = getNotes().findIndex(n => n.id === note.id) === -1;
+
+            toolContainer.innerHTML = `
+                <h2 class="text-2xl font-bold mb-4 text-accent-yellow">${isNew ? 'Create New Note' : 'Edit Note'}</h2>
+
+                <div class="note-editor space-y-4">
+                    <input type="text" id="note-title" placeholder="Note Title" value="${note.title}"
+                        class="w-full p-3 text-xl font-semibold border border-gray-300 rounded-lg focus:ring-accent-yellow focus:border-accent-yellow" required>
+
+                    <textarea id="note-content" placeholder="Start writing your notes here..."
+                        class="w-full p-3 border border-gray-300 rounded-lg shadow-inner focus:ring-accent-yellow focus:border-accent-yellow">${note.content}</textarea>
+                    
+                    <div class="flex justify-between space-x-2 mt-4">
+                        <button onclick="returnToNotesList()" class="px-4 py-2 bg-gray-400 text-white font-semibold rounded-lg hover:bg-gray-500 transition-colors shadow-md flex-1">
+                            Cancel
+                        </button>
+                        <button onclick="saveNote(${note.id})" class="px-4 py-2 bg-accent-green text-white font-semibold rounded-lg hover:bg-green-600 transition-colors shadow-md flex-1">
+                            Save Note
+                        </button>
+                    </div>
+                    ${!isNew ? `
+                        <button onclick="deleteNote(${note.id})" class="w-full py-2 bg-accent-red text-white font-semibold rounded-lg hover:bg-red-600 transition-colors shadow-md mt-2">
+                            Delete Note
+                        </button>
+                    ` : ''}
+                </div>
+            `;
+        }
+        
+        function saveNote(id) {
+            const title = document.getElementById('note-title').value.trim();
+            const content = document.getElementById('note-content').value.trim();
+
+            if (!title) {
+                alert("Please enter a note title.");
+                return;
+            }
+
+            const notes = getNotes();
+            const existingIndex = notes.findIndex(n => n.id === id);
+
+            const updatedNote = {
+                id: id,
+                title: title,
+                content: content,
+                timestamp: Date.now()
+            };
+
+            if (existingIndex > -1) {
+                // Update existing note
+                notes[existingIndex] = updatedNote;
+            } else {
+                // Add new note
+                notes.unshift(updatedNote); // Add to the start
+            }
+
+            saveNotes(notes);
+            returnToNotesList();
+        }
+
+        function deleteNote(id) {
+            // Using a simple check instead of a complex modal
+            const notes = getNotes();
+            const existingIndex = notes.findIndex(n => n.id === id);
+            
+            if (existingIndex > -1) {
+                if (confirm('Are you sure you want to delete this note?')) {
+                    notes.splice(existingIndex, 1);
+                    saveNotes(notes);
+                    returnToNotesList();
+                }
+            } else {
+                returnToNotesList();
+            }
+        }
+
+
+        function renderNotes() {
+            const notes = getNotes().sort((a, b) => b.timestamp - a.timestamp); // Sort by newest first
+
+            toolContainer.innerHTML = `
+                <h2 class="text-2xl font-bold mb-4 text-primary-blue">Study Notes</h2>
+
+                <button onclick="addNewNote()" class="w-full flex items-center justify-center p-3 mb-6 bg-accent-yellow text-white font-bold rounded-lg hover:bg-yellow-600 transition-colors shadow-md">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                    Add New Note
+                </button>
+
+                <ul id="notes-list" class="space-y-3">
+                    <!-- Notes items will be injected here -->
+                </ul>
+            `;
+
+            const listElement = document.getElementById('notes-list');
+
+            if (notes.length === 0) {
+                listElement.innerHTML = '<li class="text-center text-gray-400 py-6">No notes found. Tap "Add New Note" to start writing!</li>';
+                return;
+            }
+
+            notes.forEach(note => {
+                const date = new Date(note.timestamp);
+                const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                const listItem = document.createElement('li');
+                // onclick calls the viewNote function with the note ID
+                listItem.onclick = () => viewNote(note.id); 
+                listItem.className = 'p-4 bg-secondary-gray rounded-lg shadow-sm hover:shadow-md hover:bg-gray-200 transition-all cursor-pointer border-l-4 border-accent-yellow';
+                
+                listItem.innerHTML = `
+                    <h3 class="text-lg font-semibold text-gray-800 truncate">${note.title}</h3>
+                    <p class="text-sm text-gray-600 mt-1 line-clamp-1">${note.content.substring(0, 100)}</p>
+                    <p class="text-xs text-gray-400 mt-2">Last Edited: ${formattedDate}</p>
+                `;
+                listElement.appendChild(listItem);
+            });
+        }
+        
+        // --- To-Do List Tool Logic (using localStorage) ---
+
+        const TODO_STORAGE_KEY = 'schoolToolkit_todos';
+
+        function getTodos() {
+            try {
+                const todos = localStorage.getItem(TODO_STORAGE_KEY);
+                return todos ? JSON.parse(todos) : [];
+            } catch (e) {
+                console.error("Could not load todos from localStorage:", e);
+                return [];
+            }
+        }
+
+        function saveTodos(todos) {
+            try {
+                localStorage.setItem(TODO_STORAGE_KEY, JSON.stringify(todos));
+            } catch (e) {
+                console.error("Could not save todos to localStorage:", e);
+            }
+        }
+
+        function renderTodoList() {
+            toolContainer.innerHTML = `
+                <h2 class="text-2xl font-bold mb-4 text-primary-blue">Assignment To-Do List</h2>
+                <p class="text-sm text-gray-500 mb-4">Your tasks are saved locally on this browser.</p>
+
+                <!-- Add Task Form -->
+                <!-- Form submission calls globally attached function -->
+                <form id="add-todo-form" onsubmit="handleAddTodo(event)" class="flex mb-6">
+                    <input type="text" id="todo-input" placeholder="Enter new assignment or task..."
+                        class="flex-grow p-3 border border-gray-300 rounded-l-lg focus:ring-accent-red focus:border-accent-red" required>
+                    <button type="submit" class="px-5 bg-accent-red text-white font-semibold rounded-r-lg hover:bg-red-600 transition-colors shadow-md">
+                        Add
+                    </button>
+                </form>
+
+                <!-- To-Do List Container -->
+                <ul id="todo-list" class="space-y-3">
+                    <!-- Tasks will be injected here -->
+                </ul>
+            `;
+            
+            // We use the onsubmit attribute on the form, so we don't need a separate listener here,
+            // but we must ensure loadTodos is called to render the list
+            loadTodos();
+        }
+
+        function handleAddTodo(event) {
+            event.preventDefault();
+            const input = document.getElementById('todo-input');
+            const text = input.value.trim();
+
+            if (text) {
+                const todos = getTodos();
+                todos.push({ text: text, completed: false });
+                saveTodos(todos);
+                input.value = ''; // Clear input
+                loadTodos(); // Re-render the list
+            }
+        }
+
+        function loadTodos() {
+            const todos = getTodos();
+            const listElement = document.getElementById('todo-list');
+            
+            if (!listElement) return; // Prevent error if loadTodos is called outside of the todo tool
+
+            listElement.innerHTML = ''; // Clear existing list
+
+            if (todos.length === 0) {
+                listElement.innerHTML = '<li class="text-center text-gray-400 py-6">All clear! Add a new task above.</li>';
+                return;
+            }
+
+            todos.forEach((todo, index) => {
+                const listItem = document.createElement('li');
+                listItem.className = `flex items-center p-3 bg-secondary-gray rounded-lg shadow-sm transition-opacity ${todo.completed ? 'opacity-50' : ''}`;
+                
+                listItem.innerHTML = `
+                    <!-- onclick calls globally attached function -->
+                    <input type="checkbox" id="todo-${index}" ${todo.completed ? 'checked' : ''} 
+                        onclick="toggleTodo(${index})" class="w-5 h-5 text-accent-red rounded border-gray-300 focus:ring-accent-red cursor-pointer">
+                    
+                    <label for="todo-${index}" class="ml-3 flex-grow text-lg font-medium text-gray-700 ${todo.completed ? 'line-through text-gray-500' : ''} cursor-pointer">
+                        ${todo.text}
+                    </label>
+
+                    <!-- onclick calls globally attached function -->
+                    <button onclick="deleteTodo(${index})" title="Delete Task"
+                        class="ml-3 p-1 text-gray-400 hover:text-accent-red transition-colors rounded-full hover:bg-gray-200">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3m-3 0h14"></path></svg>
+                    </button>
+                `;
+                listElement.appendChild(listItem);
+            });
+        }
+
+        function toggleTodo(index) {
+            const todos = getTodos();
+            if (index >= 0 && index < todos.length) {
+                todos[index].completed = !todos[index].completed;
+                saveTodos(todos);
+                loadTodos(); // Re-render to update classes/UI
+            }
+        }
+
+        function deleteTodo(index) {
+            const todos = getTodos();
+            if (index >= 0 && index < todos.length) {
+                // Use a standard browser confirmation as a temporary measure
+                if (confirm('Are you sure you want to delete this to-do item?')) {
+                    todos.splice(index, 1); // Remove item at index
+                    saveTodos(todos);
+                    loadTodos(); // Re-render the list
+                }
+            }
+        }
+
+    </script>
+</body>
+</html>
